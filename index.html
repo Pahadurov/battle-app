@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Clash of Minds</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f1a;
+            color: #fff;
+            min-height: 100vh;
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0 20px;
+            border-bottom: 1px solid #2a2a3e;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #7c5cfc, #5c3cfc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header .user-info {
+            font-size: 12px;
+            color: #888;
+            background: #1a1a2e;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .card {
+            background: #1a1a2e;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #2a2a3e;
+        }
+        .card h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #c8c8e8;
+        }
+        .card p {
+            font-size: 14px;
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #7c5cfc, #5c3cfc);
+            color: #fff;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: #fff;
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: #fff;
+        }
+        .btn-outline {
+            background: transparent;
+            color: #7c5cfc;
+            border: 2px solid #7c5cfc;
+        }
+        .btn-sm {
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 6px;
+        }
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #2a2a3e;
+            background: #12122a;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .input-group input:focus, .input-group textarea:focus {
+            border-color: #7c5cfc;
+        }
+        .input-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-gold {
+            background: #f39c12;
+            color: #fff;
+        }
+        .badge-purple {
+            background: #7c5cfc;
+            color: #fff;
+        }
+        .badge-green {
+            background: #2ecc71;
+            color: #fff;
+        }
+        .badge-red {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .menu-item {
+            background: #1a1a2e;
+            border: 1px solid #2a2a3e;
+            border-radius: 16px;
+            padding: 20px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .menu-item:active {
+            transform: scale(0.95);
+            background: #2a2a3e;
+        }
+        .menu-item .icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .menu-item .label {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .clan-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #1a1a2e;
+        }
+        .clan-item:last-child {
+            border-bottom: none;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a2e;
+            border-top: 1px solid #2a2a3e;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .bottom-nav .nav-item {
+            text-align: center;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            flex: 1;
+        }
+        .bottom-nav .nav-item:active {
+            background: #2a2a3e;
+        }
+        .bottom-nav .nav-item .icon {
+            font-size: 22px;
+            display: block;
+        }
+        .bottom-nav .nav-item .label {
+            font-size: 10px;
+            color: #888;
+        }
+        .bottom-nav .nav-item.active .label {
+            color: #7c5cfc;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2a2a3e;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 999;
+            animation: fadeIn 0.3s ease;
+            border: 1px solid #3a3a5e;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 4px;
+            background: #12122a;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+        .tab-bar .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            color: #888;
+            transition: all 0.2s;
+        }
+        .tab-bar .tab.active {
+            background: #7c5cfc;
+            color: #fff;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #1a1a2e;
+        }
+        .leaderboard-item .rank {
+            font-weight: 700;
+            color: #7c5cfc;
+            width: 30px;
+        }
+        .leaderboard-item .name {
+            flex: 1;
+            margin-left: 10px;
+        }
+        .leaderboard-item .points {
+            font-weight: 600;
+            color: #f39c12;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- СТРАНИЦА: ГЛАВНАЯ -->
+<div id="page-home" class="page active">
+    <div class="header">
+        <h1>⚔️ Clash of Minds</h1>
+        <span class="user-info" id="userInfo">👤 Загрузка...</span>
+    </div>
+
+    <div class="card">
+        <p style="text-align:center; font-size:14px;">
+            Сражайся, создавай кланы, становись лучшим!
+        </p>
+    </div>
+
+    <div class="menu-grid">
+        <div class="menu-item" onclick="navigateTo('battle')">
+            <span class="icon">⚔️</span>
+            <span class="label">Битва</span>
+        </div>
+        <div class="menu-item" onclick="navigateTo('clan')">
+            <span class="icon">🏰</span>
+            <span class="label">Клан</span>
+        </div>
+        <div class="menu-item" onclick="navigateTo('rating')">
+            <span class="icon">🏆</span>
+            <span class="label">Рейтинг</span>
+        </div>
+        <div class="menu-item" onclick="navigateTo('shop')">
+            <span class="icon">💰</span>
+            <span class="label">Донат</span>
+        </div>
+        <div class="menu-item" onclick="navigateTo('chat')">
+            <span class="icon">🌍</span>
+            <span class="label">Чат</span>
+        </div>
+        <div class="menu-item" onclick="navigateTo('profile')">
+            <span class="icon">👤</span>
+            <span class="label">Профиль</span>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+        <h3>📊 Текущий турнир</h3>
+        <p id="tournamentInfo">Загрузка...</p>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- СТРАНИЦА: БИТВА -->
+<div id="page-battle" class="page">
+    <div class="header">
+        <span style="font-size:24px; cursor:pointer;" onclick="navigateTo('home')">‹</span>
+        <h1>⚔️ Битва</h1>
+        <span style="width:24px;"></span>
+    </div>
+
+    <div class="tab-bar" id="battleTabs">
+        <div class="tab active" data-tab="1v1">1/1</div>
+        <div class="tab" data-tab="2v2">2/2</div>
+        <div class="tab" data-tab="3v3">3/3</div>
+        <div class="tab" data-tab="4v4">4/4</div>
+        <div class="tab" data-tab="1s">1›</div>
+    </div>
+
+    <!-- 1/1 -->
+    <div id="battle-1v1" class="tab-content active">
+        <div class="card">
+            <h3>🗡️ Дуэль 1/1</h3>
+            <p>Выбери соперника и докажи свою правоту!</p>
+            <div class="input-group">
+                <label>Твой аргумент</label>
+                <textarea id="arg1" placeholder="Напиши свой аргумент..."></textarea>
+            </div>
+            <div class="input-group">
+                <label>Аргумент соперника</label>
+                <textarea id="arg2" placeholder="Напиши аргумент соперника..."></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="startBattle('1v1')">⚔️ Начать битву</button>
+        </div>
+        <div id="battleResult" class="card hidden">
+            <h3>🏆 Результат</h3>
+            <div id="battleResultText"></div>
+        </div>
+    </div>
+
+    <!-- 2/2, 3/3, 4/4 (заглушка) -->
+    <div id="battle-2v2" class="tab-content">
+        <div class="card"><h3>🛡️ Командная битва 2/2</h3><p>Скоро будет доступно!</p></div>
+    </div>
+    <div id="battle-3v3" class="tab-content">
+        <div class="card"><h3>⚔️ Клановый бой 3/3</h3><p>Скоро будет доступно!</p></div>
+    </div>
+    <div id="battle-4v4" class="tab-content">
+        <div class="card"><h3>🏛️ Большой совет 4/4</h3><p>Скоро будет доступно!</p></div>
+    </div>
+    <div id="battle-1s" class="tab-content">
+        <div class="card"><h3>📱 Один экран</h3>
+            <p>Передавай телефон и играйте вместе!</p>
+            <button class="btn btn-primary" onclick="startOneScreen()">▶️ Запустить</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- СТРАНИЦА: КЛАН -->
+<div id="page-clan" class="page">
+    <div class="header">
+        <span style="font-size:24px; cursor:pointer;" onclick="navigateTo('home')">‹</span>
+        <h1>🏰 Клан</h1>
+        <span style="width:24px;"></span>
+    </div>
+
+    <div id="clanInfo">
+        <div class="card">
+            <h3 id="clanName">У тебя нет клана</h3>
+            <p id="clanDetails">Создай свой клан или вступи в существующий</p>
+            <button class="btn btn-primary" onclick="showCreateClan()">💰 Создать клан (150 ₽)</button>
+        </div>
+    </div>
+
+    <div id="clanCreateForm" class="hidden">
+        <div class="card">
+            <h3>Создание клана</h3>
+            <div class="input-group">
+                <label>Название клана</label>
+                <input id="clanNameInput" placeholder="Введи название...">
+            </div>
+            <div class="input-group">
+                <label>Тег (3-4 буквы)</label>
+                <input id="clanTagInput" placeholder="Например: LEG" maxlength="4">
+            </div>
+            <button class="btn btn-success" onclick="createClan()">✅ Создать</button>
+            <button class="btn btn-outline btn-sm" onclick="hideCreateClan()">Отмена</button>
+        </div>
+    </div>
+
+    <div id="clanMembers" class="hidden">
+        <div class="card">
+            <h3>👥 Участники</h3>
+            <div id="membersList"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- СТРАНИЦА: РЕЙТИНГ -->
+<div id="page-rating" class="page">
+    <div class="header">
+        <span style="font-size:24px; cursor:pointer;" onclick="navigateTo('home')">‹</span>
+        <h1>🏆 Рейтинг</h1>
+        <span style="width:24px;"></span>
+    </div>
+
+    <div class="card">
+        <h3>Топ-10 кланов</h3>
+        <div id="ratingList">
+            <p style="color:#888; text-align:center; padding:20px;">Загрузка...</p>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- СТРАНИЦА: ДОНАТ -->
+<div id="page-shop" class="page">
+    <div class="header">
+        <span style="font-size:24px; cursor:pointer;" onclick="navigateTo('home')">‹</span>
+        <h1>💰 Донат-бокс</h1>
+        <span style="width:24px;"></span>
+    </div>
+
+    <div class="card">
+        <h3>Пополни очки клана</h3>
+        <div class="grid-2">
+            <button class="btn btn-gold" onclick="buyPoints(25, 50)">🪙 25 очков<br><small>50 ₽</small></button>
+            <button class="btn btn-gold" onclick="buyPoints(100, 150)">🪙 100 очков<br><small>150 ₽</small></button>
+            <button class="btn btn-gold" onclick="buyPoints(250, 300)">🪙 250 очков<br><small>300 ₽</small></button>
+            <button class="btn btn-gold" onclick="buyPoints(500, 500)">👑 500 очков<br><small>500 ₽</small></button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Бусты</h3>
+        <button class="btn btn-primary btn-sm" onclick="buyBoost('shield')">🛡️ Щит клана — 30 ₽</button>
+        <button class="btn btn-primary btn-sm" onclick="buyBoost('herald')">📢 Глашатай — 50 ₽</button>
+        <button class="btn btn-primary btn-sm" onclick="buyBoost('rename')">🏷️ Смена названия — 100 ₽</button>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- СТРАНИЦА: ЧАТ -->
+<div id="page-chat" class="page">
+    <div class="header">
+        <span style="font-size:24px; cursor:pointer;" onclick="navigateTo('home')">‹</span>
+        <h1>🌍 Мировой чат</h1>
+        <span style="width:24px;"></span>
+    </div>
+
+    <div class="card">
+        <p style="color:#888; text-align:center; padding:20px;">
+            Чат откроется для кланов 6+ уровня
+        </p>
+        <div id="chatMessages" style="max-height:300px; overflow-y:auto; margin-bottom:12px;">
+            <p style="color:#555; text-align:center;">Нет сообщений</p>
+        </div>
+        <div class="input-group">
+            <input id="chatInput" placeholder="Напиши сообщение...">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="sendChatMessage()">📤 Отправить</button>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- СТРАНИЦА: ПРОФИЛЬ -->
+<div id="page-profile" class="page">
+    <div class="header">
+        <span style="font-size:24px; cursor:pointer;" onclick="navigateTo('home')">‹</span>
+        <h1>👤 Профиль</h1>
+        <span style="width:24px;"></span>
+    </div>
+
+    <div class="card">
+        <h3>📊 Статистика</h3>
+        <div id="profileStats">
+            <p>Имя: <span id="pUsername">—</span></p>
+            <p>Клан: <span id="pClan">—</span></p>
+            <p>Рейтинг: <span id="pRating">0</span></p>
+            <p>Побед: <span id="pWins">0</span></p>
+            <p>Поражений: <span id="pLosses">0</span></p>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TOAST -->
+<div id="toast" class="toast hidden"></div>
+
+<!-- ============================================================ -->
+<!-- НИЖНЕЕ МЕНЮ -->
+<div class="bottom-nav">
+    <div class="nav-item active" onclick="navigateTo('home')">
+        <span class="icon">🏠</span>
+        <span class="label">Главная</span>
+    </div>
+    <div class="nav-item" onclick="navigateTo('battle')">
+        <span class="icon">⚔️</span>
+        <span class="label">Битва</span>
+    </div>
+    <div class="nav-item" onclick="navigateTo('clan')">
+        <span class="icon">🏰</span>
+        <span class="label">Клан</span>
+    </div>
+    <div class="nav-item" onclick="navigateTo('rating')">
+        <span class="icon">🏆</span>
+        <span class="label">Рейтинг</span>
+    </div>
+    <div class="nav-item" onclick="navigateTo('shop')">
+        <span class="icon">💰</span>
+        <span class="label">Донат</span>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<script>
+    // ========================================
+    // ПОДКЛЮЧЕНИЕ К TELEGRAM
+    // ========================================
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    // ========================================
+    // ПЕРЕХОД МЕЖДУ СТРАНИЦАМИ
+    // ========================================
+    function navigateTo(page) {
+        // Скрыть все страницы
+        document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+        // Показать нужную
+        const target = document.getElementById('page-' + page);
+        if (target) target.classList.add('active');
+        // Обновить нижнее меню
+        document.querySelectorAll('.bottom-nav .nav-item').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.bottom-nav .nav-item').forEach(el => {
+            if (el.textContent.trim().toLowerCase().includes(page)) {
+                el.classList.add('active');
+            }
+        });
+        // Спец. обработка для профиля
+        if (page === 'profile') updateProfile();
+        if (page === 'rating') updateRating();
+        if (page === 'clan') updateClanInfo();
+    }
+
+    // ========================================
+    // ПОКАЗАТЬ УВЕДОМЛЕНИЕ
+    // ========================================
+    function showToast(text, duration = 2500) {
+        const toast = document.getElementById('toast');
+        toast.textContent = text;
+        toast.classList.remove('hidden');
+        clearTimeout(toast._timeout);
+        toast._timeout = setTimeout(() => {
+            toast.classList.add('hidden');
+        }, duration);
+    }
+
+    // ========================================
+    // ИНФОРМАЦИЯ О ПОЛЬЗОВАТЕЛЕ
+    // ========================================
+    function updateUserInfo() {
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('userInfo').textContent = '👤 ' + (user.first_name || 'Игрок');
+        } else {
+            document.getElementById('userInfo').textContent = '👤 Гость';
+        }
+    }
+    updateUserInfo();
+
+    // ========================================
+    // ВКЛАДКИ БИТВЫ
+    // ========================================
+    document.querySelectorAll('#battleTabs .tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Активная вкладка
+            document.querySelectorAll('#battleTabs .tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            // Контент
+            const tabId = this.dataset.tab;
+            document.querySelectorAll('#page-battle .tab-content').forEach(c => c.classList.remove('active'));
+            const target = document.getElementById('battle-' + tabId);
+            if (target) target.classList.add('active');
+        });
+    });
+
+    // ========================================
+    // БИТВА 1/1
+    // ========================================
+    async function startBattle(mode) {
+        const arg1 = document.getElementById('arg1').value.trim();
+        const arg2 = document.getElementById('arg2').value.trim();
+
+        if (!arg1 || !arg2) {
+            showToast('⚠️ Введи оба аргумента!');
+            return;
+        }
+
+        showToast('🧠 Отправляю на оценку ИИ...');
+
+        // Отправляем в бота
+        tg.sendData(JSON.stringify({
+            action: 'battle',
+            mode: mode,
+            arg1: arg1,
+            arg2: arg2
+        }));
+
+        // Показываем результат (заглушка)
+        const resultDiv = document.getElementById('battleResult');
+        resultDiv.classList.remove('hidden');
+
+        // Имитация ответа от бота (потом заменим на реальный)
+        setTimeout(() => {
+            const scores = {
+                arg1: { логика: 7, факты: 6, убедительность: 8, оригинальность: 5, структура: 7 },
+                arg2: { логика: 6, факты: 5, убедительность: 7, оригинальность: 6, структура: 6 }
+            };
+            const total1 = Object.values(scores.arg1).reduce((a,b) => a+b, 0);
+            const total2 = Object.values(scores.arg2).reduce((a,b) => a+b, 0);
+            const winner = total1 > total2 ? 'Первый игрок' : total2 > total1 ? 'Второй игрок' : 'Ничья';
+
+            document.getElementById('battleResultText').innerHTML = `
+                <div style="margin:8px 0; padding:12px; background:#1a1a3e; border-radius:10px;">
+                    <strong>📝 Аргумент 1:</strong> ${arg1}<br>
+                    ⭐ ${total1}/50 баллов
+                </div>
+                <div style="margin:8px 0; padding:12px; background:#1a1a3e; border-radius:10px;">
+                    <strong>📝 Аргумент 2:</strong> ${arg2}<br>
+                    ⭐ ${total2}/50 баллов
+                </div>
+                <h3 style="text-align:center; margin-top:12px;">🏆 Победитель: ${winner}</h3>
+            `;
+        }, 1500);
+    }
+
+    // ========================================
+    // ОДИН ЭКРАН (1>)
+    // ========================================
+    function startOneScreen() {
+        showToast('📱 Режим "Один экран" — скоро будет доступен!');
+        tg.sendData(JSON.stringify({
+            action: 'onescreen',
+            status: 'started'
+        }));
+    }
+
+    // ========================================
+    // КЛАН
+    // ========================================
+    function updateClanInfo() {
+        // Заглушка — потом данные из бота
+        document.getElementById('clanName').textContent = '🏰 Легион';
+        document.getElementById('clanDetails').innerHTML = `
+            Уровень: 3<br>
+            Очков: 340<br>
+            Участников: 8/20
+        `;
+    }
+
+    function showCreateClan() {
+        document.getElementById('clanCreateForm').classList.remove('hidden');
+    }
+
+    function hideCreateClan() {
+        document.getElementById('clanCreateForm').classList.add('hidden');
+    }
+
+    function createClan() {
+        const name = document.getElementById('clanNameInput').value.trim();
+        const tag = document.getElementById('clanTagInput').value.trim().toUpperCase();
+
+        if (!name || !tag) {
+            showToast('⚠️ Заполни все поля!');
+            return;
+        }
+        if (tag.length < 3 || tag.length > 4) {
+            showToast('⚠️ Тег должен быть 3-4 символа!');
+            return;
+        }
+
+        tg.sendData(JSON.stringify({
+            action: 'create_clan',
+            name: name,
+            tag: tag
+        }));
+
+        showToast('💰 Клан создан! Списан 150 ₽');
+        hideCreateClan();
+        updateClanInfo();
+    }
+
+    // ========================================
+    // РЕЙТИНГ
+    // ========================================
+    function updateRating() {
+        const list = document.getElementById('ratingList');
+        // Заглушка
+        const clans = [
+            { name: 'Легион', tag: 'LEG', points: 2450 },
+            { name: 'Воины', tag: 'WAR', points: 2100 },
+            { name: 'Ярость', tag: 'FUR', points: 1890 },
+            { name: 'Новые', tag: 'NEW', points: 1500 },
+            { name: 'Коты', tag: 'KOT', points: 1200 },
+        ];
+        list.innerHTML = clans.map((c, i) => `
+            <div class="leaderboard-item">
+                <span class="rank">#${i+1}</span>
+                <span class="name">[${c.tag}] ${c.name}</span>
+                <span class="points">${c.points}</span>
+            </div>
+        `).join('');
+    }
+
+    // ========================================
+    // ДОНАТ
+    // ========================================
+    function buyPoints(points, price) {
+        tg.sendData(JSON.stringify({
+            action: 'buy_points',
+            points: points,
+            price: price
+        }));
+        showToast(`🪙 Покупка ${points} очков за ${price} ₽`);
+    }
+
+    function buyBoost(type) {
+        const names = { shield: 'Щит клана', herald: 'Глашатай', rename: 'Смена названия' };
+        tg.sendData(JSON.stringify({
+            action: 'buy_boost',
+            boost: type
+        }));
+        showToast(`✅ Куплен буст: ${names[type]}`);
+    }
+
+    // ========================================
+    // ПРОФИЛЬ
+    // ========================================
+    function updateProfile() {
+        const user = tg.initDataUnsafe?.user;
+        document.getElementById('pUsername').textContent = user?.first_name || 'Гость';
+        document.getElementById('pClan').textContent = 'Легион';
+        document.getElementById('pRating').textContent = '42';
+        document.getElementById('pWins').textContent = '15';
+        document.getElementById('pLosses').textContent = '8';
+    }
+
+    // ========================================
+    // ЧАТ
+    // ========================================
+    function sendChatMessage() {
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text) return;
+        tg.sendData(JSON.stringify({
+            action: 'chat_message',
+            message: text
+        }));
+        const container = document.getElementById('chatMessages');
+        container.innerHTML += `<p style="color:#7c5cfc; text-align:right;">Вы: ${text}</p>`;
+        input.value = '';
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // ========================================
+    // ЗАГРУЗКА
+    // ========================================
+    console.log('⚔️ Clash of Minds Web App loaded!');
+    tg.sendData(JSON.stringify({
+        action: 'init',
+        user: tg.initDataUnsafe?.user || null
+    }));
+
+    // Обновляем информацию
+    updateClanInfo();
+</script>
+</body>
+</html>
